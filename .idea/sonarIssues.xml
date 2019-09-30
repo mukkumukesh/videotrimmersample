@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="issues">
+    <option name="index">
+      <map>
+        <entry key="/Dummy.txt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="/a.dummy">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="/fragment.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="/fragment.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../demo/VideoTrimmer/app/src/main/java/com/lb/video_trimmer_sample/ThirdPartyIntentsUtil.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../demo/VideoTrimmer/app/src/main/res/layout/activity_trimmer.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../demo/VideoTrimmer/video_trimmer_library/src/main/java/com/lb/video_trimmer_library/view/RangeSeekBarView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../demo/VideoTrimmer/video_trimmer_library/src/main/java/com/lb/video_trimmer_library/view/TimeLineView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/sample/videotrimmersample/MainActivity.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/sample/videotrimmersample/TrimmerActivity.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/layout/activity_trimmer.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/build.gradle">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/BaseVideoTrimmerView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/OnProgressVideoListener.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/VideoUtils/BackgroundExecutor.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/VideoUtils/FileUtils.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/VideoUtils/TrimVideoUtils.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/VideoUtils/UiThreadExecutor.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/interfaces/OnProgressVideoListener.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/interfaces/OnRangeSeekBarListener.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/interfaces/VideoTrimmingListener.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/videoutils/TrimVideoUtils.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/views/FrameTimeLimeView.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/views/FrameTimeLimeView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/views/SeekBarView.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/views/SeekBarView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/java/com/sample/videotrimmerlib/views/VideoTrimmerView.kt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/res/drawable/ic_video_play.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/res/layout/video_trimmer.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/videotrimmerlib/src/main/res/values/strings.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
