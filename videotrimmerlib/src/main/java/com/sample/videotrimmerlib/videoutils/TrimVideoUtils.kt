@@ -5,6 +5,8 @@ import android.media.*
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
+import android.util.Log
 import android.util.SparseIntArray
 import androidx.annotation.NonNull
 import androidx.annotation.WorkerThread
@@ -15,6 +17,8 @@ import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack
 import com.googlecode.mp4parser.authoring.tracks.CroppedTrack
 import com.sample.videotrimmerlib.interfaces.VideoTrimmingListener
+import nl.bravobit.ffmpeg.ExecuteBinaryResponseHandler
+import nl.bravobit.ffmpeg.FFmpeg
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -22,6 +26,7 @@ import java.nio.ByteBuffer
 import java.util.*
 
 object TrimVideoUtils {
+    private val TAG: String = "TrimVideoUtils: "
     private const val DEFAULT_BUFFER_SIZE = 1024 * 1024
 
     @JvmStatic
@@ -30,6 +35,7 @@ object TrimVideoUtils {
         context: Context,
         inputVideoUri: Uri,
         outputTrimmedVideoFile: File,
+        watermarkFile: File?,
         startMs: Long,
         endMs: Long,
         durationInMs: Long,
@@ -46,29 +52,126 @@ object TrimVideoUtils {
         }
         if (!succeeded) {
             try {
-                val inputFilePath = FileUtils.getPath(context, inputVideoUri)
-                succeeded = genVideoUsingMp4Parser(inputFilePath, outputTrimmedVideoFile, startMs, endMs)
+                FileUtils.getPath(context, inputVideoUri)?.let {
+                    genVideoUsingFFmpegParser(
+                        context,
+                        it,
+                        outputTrimmedVideoFile,
+                        watermarkFile,
+                        startMs,
+                        endMs,
+                        callback
+                    )
+                }
             } catch (e: Exception) {
+                e.printStackTrace()
             }
+        }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    fun genVideoUsingFFmpegParser(
+        context: Context,
+        src: String,
+        dst: File,
+        watermarkFile: File?,
+        startMs: Long,
+        endMs: Long,
+        callback: VideoTrimmingListener
+    ) {
+        val startTime = System.currentTimeMillis() / 60000.0
+        val start = convertSecondsToTime(startMs / 1000)
+        val duration = convertSecondsToTime((endMs - startMs) / 1000)
+        val complexCommand: Array<String>
+        if (watermarkFile != null && !TextUtils.isEmpty(watermarkFile.absolutePath)) {
+            complexCommand = arrayOf(
+                "-ss",
+                "" + start,
+                "-async",
+                "1",
+                "-i",
+                src,
+                "-i",
+                watermarkFile.absolutePath,
+                "-filter_complex",
+                "overlay=W-w-5:5",
+                "-t",
+                "" + duration,
+                dst.absolutePath
+            )
+        } else {
+            complexCommand = arrayOf(
+                "-ss",
+                "" + start,
+                "-async",
+                "1",
+                "-i",
+                src,
+                "-t",
+                "" + duration,
+                dst.absolutePath
+            )
+        }
+        try {
+            FFmpeg.getInstance(context).execute(complexCommand, object : ExecuteBinaryResponseHandler() {
+                override fun onSuccess(s: String?) {
+                    val endTime = System.currentTimeMillis() / 60000.0
+                    Log.d(TAG, "Using FFmpeg : onSuccess")
+                    Handler(Looper.getMainLooper()).post {
+                        callback.onFinishedTrimming(Uri.parse(dst.absolutePath))
+                    }
+                }
+
+                override fun onFailure(message: String?) {
+                    Log.d(TAG, "Using FFmpeg : onFailure")
+                    executeOtherMethod(context, src, dst, startMs, endMs, callback)
+                }
+
+            })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun executeOtherMethod(
+        context: Context,
+        src: String,
+        dst: File,
+        startMs: Long,
+        endMs: Long,
+        callback: VideoTrimmingListener
+    ) {
+        var succeeded = false
+        try {
+            succeeded = genVideoUsingMp4Parser(src, dst, startMs, endMs)
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMp4Parser : success") else Log.d(TAG, "Using genVideoUsingMp4Parser : fail")
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         if (!succeeded) {
             succeeded = genVideoUsingMuxer(
                 context,
-                inputVideoUri,
-                outputTrimmedVideoFile.absolutePath,
+                Uri.parse(src),
+                dst.absolutePath,
                 startMs,
                 endMs,
                 true,
                 true
             )
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMuxer : success") else Log.d(TAG, "Using genVideoUsingMuxer : fail")
         }
         Handler(Looper.getMainLooper()).post {
-            callback.onFinishedTrimming(if (succeeded) Uri.parse(outputTrimmedVideoFile.absolutePath) else null)
+            callback.onFinishedTrimming(if (succeeded) Uri.parse(dst.absolutePath) else null)
         }
     }
 
     @Throws(IOException::class)
-    private fun genVideoUsingMp4Parser(filePath: String?, dst: File, startMs: Long, endMs: Long): Boolean {
+    private fun genVideoUsingMp4Parser(
+        filePath: String?,
+        dst: File,
+        startMs: Long,
+        endMs: Long
+    ): Boolean {
         if (filePath.isNullOrBlank() || !File(filePath).exists())
             return false
         // NOTE: Switched to using FileDataSourceViaHeapImpl since it does not use memory mapping (VM).
@@ -132,7 +235,6 @@ object TrimVideoUtils {
         return true
     }
 
-    //https://stackoverflow.com/a/44653626/878126 https://android.googlesource.com/platform/packages/apps/Gallery2/+/634248d/src/com/android/gallery3d/app/VideoUtils.java
     @JvmStatic
     @WorkerThread
     private fun genVideoUsingMuxer(
@@ -233,7 +335,6 @@ object TrimVideoUtils {
         return false
     }
 
-
     private fun correctTimeToSyncSample(@NonNull track: Track, cutHere: Double, next: Boolean): Double {
         val timeOfSyncSamples = DoubleArray(track.syncSamples.size)
         var currentSample: Long = 0
@@ -259,6 +360,37 @@ object TrimVideoUtils {
             previous = timeOfSyncSample
         }
         return timeOfSyncSamples[timeOfSyncSamples.size - 1]
+    }
+
+    private fun convertSecondsToTime(seconds: Long): String {
+        val timeStr: String
+        val hour: Int
+        var minute: Int
+        val second: Int
+        if (seconds <= 0)
+            return "00:00"
+        else {
+            minute = seconds.toInt() / 60
+            if (minute < 60) {
+                second = seconds.toInt() % 60
+                timeStr = unitFormat(minute) + ":" + unitFormat(second)
+            } else {
+                hour = minute / 60
+                if (hour > 99)
+                    return "99:59:59"
+                minute = minute % 60
+                second = (seconds - (hour * 3600).toLong() - (minute * 60).toLong()).toInt()
+                timeStr = unitFormat(hour) + ":" + unitFormat(minute) + ":" + unitFormat(second)
+            }
+        }
+        return timeStr
+    }
+
+    private fun unitFormat(i: Int): String {
+        return if (i in 0..9)
+            "0$i"
+        else
+            "" + i
     }
 
     fun getFileSize(duration: Int, totalDuration: Long, originSizeFile: Long): Long {

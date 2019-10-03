@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.sample.videotrimmerlib"/>
+          package="com.sample.videotrimmerlib">
+    <!--<application
+            android:name=".App"/>-->
+</manifest>

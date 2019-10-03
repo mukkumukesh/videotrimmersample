@@ -6,7 +6,7 @@ import androidx.annotation.UiThread
 /**
  * @author Mukesh Yadav on 29/9/19.
  */
-interface VideoTrimmingListener {
+public interface VideoTrimmingListener {
     @UiThread
     fun onVideoPrepared()
 

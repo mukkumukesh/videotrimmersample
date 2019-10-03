@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
@@ -21,10 +22,12 @@ open class SeekBarView @JvmOverloads constructor(
         LEFT(0), RIGHT(1)
     }
 
+    private val TAG: String = "SeekBarView"
     private val thumbTouchExtraMultiplier = initThumbTouchExtraMultiplier()
     private val thumbs = arrayOf(Thumb(ThumbType.LEFT.index), Thumb(ThumbType.RIGHT.index))
     private var listeners = HashSet<OnRangeSeekBarListener>()
     private var maxWidth: Float = 0.toFloat()
+    private var minWidth: Float = 0.toFloat()
     val thumbWidth = initThumbWidth(context)
     private var viewWidth: Int = 0
     private var pixelRangeMin: Float = 0.toFloat()
@@ -65,6 +68,7 @@ open class SeekBarView @JvmOverloads constructor(
 
     fun initMaxWidth() {
         maxWidth = thumbs[ThumbType.RIGHT.index].pos - thumbs[ThumbType.LEFT.index].pos
+        minWidth = maxWidth/2
         onSeekStop(this, ThumbType.LEFT.index, thumbs[ThumbType.LEFT.index].value)
         onSeekStop(this, ThumbType.RIGHT.index, thumbs[ThumbType.RIGHT.index].value)
     }
@@ -74,10 +78,12 @@ open class SeekBarView @JvmOverloads constructor(
         viewWidth = measuredWidth
         pixelRangeMin = 0f
         pixelRangeMax = (viewWidth - thumbWidth).toFloat()
+        Log.d(TAG, "pixelRangeMin and pixelRangeMax: $pixelRangeMin $pixelRangeMax")
         if (firstRun) {
             for ((index, thumb) in thumbs.withIndex()) {
                 thumb.value = scaleRangeMax * index
                 thumb.pos = pixelRangeMax * index
+                Log.d(TAG, "First create: thumb$index-> $thumb")
             }
             onCreate(this, currentThumb, getThumbValue(currentThumb))
             firstRun = false
@@ -92,23 +98,23 @@ open class SeekBarView @JvmOverloads constructor(
             if (thumb.index == ThumbType.LEFT.index) {
                 val x = thumb.pos + paddingLeft
                 if (x > pixelRangeMin)
-                    canvas.drawRect(thumbWidth.toFloat(), 0f, (x + thumbWidth), height.toFloat(), shadowPaint)
+                    canvas.drawRect(thumbWidth.toFloat()-2, 0f, (x + thumbWidth)-2, height.toFloat(), shadowPaint)
             } else {
                 val x = thumb.pos + paddingRight
                 if (x < pixelRangeMax)
-                    canvas.drawRect(x, 0f, (viewWidth - thumbWidth).toFloat(), height.toFloat(), shadowPaint)
+                    canvas.drawRect(x+2, 0f, (viewWidth - thumbWidth).toFloat()+2, height.toFloat(), shadowPaint)
             }
         }
         //draw stroke around selected range
         canvas.drawRect(
-            (thumbs[ThumbType.LEFT.index].pos + paddingLeft + thumbWidth),
+            (thumbs[ThumbType.LEFT.index].pos + paddingLeft + thumbWidth)-2,
             0f,
-            thumbs[ThumbType.RIGHT.index].pos - paddingRight,
+            thumbs[ThumbType.RIGHT.index].pos - paddingRight+2,
             height.toFloat(),
             strokePaint
         )
         //draw edges
-        val circleRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6f, context.resources.displayMetrics)
+        val circleRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, context.resources.displayMetrics)
         canvas.drawCircle(
             (thumbs[ThumbType.LEFT.index].pos + paddingLeft + thumbWidth),
             height.toFloat() / 2f,
@@ -134,6 +140,7 @@ open class SeekBarView @JvmOverloads constructor(
                 if (currentThumb == -1) return false
                 thumb1 = thumbs[currentThumb]
                 thumb1.lastTouchX = xCoordinate
+                Log.d(TAG, "ACTION_DOWN: thumb1-> $thumb1")
                 onSeekStart(this, currentThumb, thumb1.value)
                 return true
             }
@@ -148,13 +155,23 @@ open class SeekBarView @JvmOverloads constructor(
                 thumb1 = thumbs[currentThumb]
                 thumb2 =
                     thumbs[if (currentThumb == ThumbType.LEFT.index) ThumbType.RIGHT.index else ThumbType.LEFT.index]
-                // Calculate the distance moved
                 val dx = xCoordinate - thumb1.lastTouchX
                 val newX = thumb1.pos + dx
+                Log.d(TAG, "dx: $dx")
+                Log.d(TAG, "newX: $newX")
+                Log.d(TAG, "Thumb1: ${thumb1.toString()}")
+                Log.d(TAG, "Thumb2: ${thumb2.toString()}")
+                Log.d(TAG, "Thumb2-thumb1: ${thumb2.value - thumb1.value}")
+
+                Log.d(TAG, "Condition false")
                 when {
                     currentThumb == 0 -> when {
-                        newX + thumbWidth >= thumb2.pos -> thumb1.pos = thumb2.pos - thumbWidth
-                        newX <= pixelRangeMin -> thumb1.pos = pixelRangeMin
+                        newX + thumbWidth >= thumb2.pos -> {
+                            thumb1.pos = thumb2.pos - thumbWidth
+                        }
+                        newX <= pixelRangeMin -> {
+                            thumb1.pos = pixelRangeMin
+                        }
                         else -> {
                             //Check if thumb is not out of max width
                             checkPositionThumb(thumb1, thumb2, dx, true)
@@ -164,8 +181,12 @@ open class SeekBarView @JvmOverloads constructor(
                             thumb1.lastTouchX = xCoordinate
                         }
                     }
-                    newX <= thumb2.pos + thumbWidth -> thumb1.pos = thumb2.pos + thumbWidth
-                    newX >= pixelRangeMax -> thumb1.pos = pixelRangeMax
+                    newX <= thumb2.pos + thumbWidth -> {
+                        thumb1.pos = thumb2.pos + thumbWidth
+                    }
+                    newX >= pixelRangeMax -> {
+                        thumb1.pos = pixelRangeMax
+                    }
                     else -> {
                         //Check if thumb is not out of max width
                         checkPositionThumb(thumb2, thumb1, dx, false)
@@ -271,6 +292,7 @@ open class SeekBarView @JvmOverloads constructor(
                 }
             }
         }
+        Log.d(TAG, "closest: $closest")
         return closest
     }
 
@@ -298,6 +320,10 @@ open class SeekBarView @JvmOverloads constructor(
         var value: Float = 0f
         var pos: Float = 0f
         var lastTouchX: Float = 0f
+
+        override fun toString(): String {
+            return "value: " + value + "pos: " + pos + "lastTouchX: " + lastTouchX
+        }
     }
 
 }

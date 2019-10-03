@@ -20,8 +20,8 @@ class TrimmerActivity : AppCompatActivity(), VideoTrimmingListener {
             finish()
             return
         }
-        videoTrimmerView.setMaxDurationInMs(300 * 1000)
-        videoTrimmerView.setOnK4LVideoListener(this)
+        videoTrimmerView.setMaxDurationInMs(20 * 1000)
+        videoTrimmerView.setOnVideoListener(this)
         val parentFolder = getExternalFilesDir(null)!!
         parentFolder.mkdirs()
         val fileName = "trimmedVideo_${System.currentTimeMillis()}.mp4"

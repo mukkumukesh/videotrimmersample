@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VideoTrimmerLib</string>
+    <string name="app_name">videotrimmerlib</string>
     <string name="short_seconds">sec</string>
     <string name="save">Save</string>
     <string name="recorded">Recorded</string>

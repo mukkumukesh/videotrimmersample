@@ -7,6 +7,7 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Environment
 import android.os.Handler
 import android.os.Message
 import android.provider.OpenableColumns
@@ -42,8 +43,9 @@ abstract class BaseVideoTrimmerView @JvmOverloads constructor(
     private val playView: View
     private val timeLineView: FrameTimeLimeView
     private var src: Uri? = null
-    private var dstFile: File? = null
+    private lateinit var dstFile: File
     protected var maxDurationInMillisecond: Int = 0
+    protected var minDurationInMillisecond: Int = 0
     private var listeners = ArrayList<OnProgressVideoListener>()
     private var videoTrimmingListener: VideoTrimmingListener? = null
     private var duration = 0
@@ -166,7 +168,8 @@ abstract class BaseVideoTrimmerView @JvmOverloads constructor(
                         TrimVideoUtils.startTrim(
                             context,
                             src!!,
-                            dstFile!!,
+                            dstFile,
+                            null,
                             startPosition.toLong(),
                             endPosition.toLong(),
                             duration.toLong(),
@@ -309,14 +312,17 @@ abstract class BaseVideoTrimmerView @JvmOverloads constructor(
     /**
      * Listener for some [VideoView] events
      *
-     * @param onK4LVideoListener interface for events
+     * @param onVideoListener interface for events
      */
-    fun setOnK4LVideoListener(onK4LVideoListener: VideoTrimmingListener) {
-        this.videoTrimmingListener = onK4LVideoListener
+    fun setOnVideoListener(onVideoListener: VideoTrimmingListener) {
+        this.videoTrimmingListener = onVideoListener
     }
 
-    fun setDestinationFile(dst: File) {
-        this.dstFile = dst
+    fun setDestinationFile(dst: File?) {
+        dstFile = if (dst != null) dst else {
+            val folder = Environment.getExternalStorageDirectory()
+            File(folder.path + File.separator)
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -332,6 +338,13 @@ abstract class BaseVideoTrimmerView @JvmOverloads constructor(
      */
     fun setMaxDurationInMs(maxDurationInMs: Int) {
         this.maxDurationInMillisecond = maxDurationInMs
+    }
+
+    /**
+     * Set the minimum duration of the trimmed video
+     */
+    fun setMinDurationInMs(minDuration: Int) {
+        this.minDurationInMillisecond = minDuration
     }
 
     /**

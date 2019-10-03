@@ -46,7 +46,7 @@ class VideoTrimmerView @JvmOverloads constructor(context: Context, attrs: Attrib
     override fun onRangeUpdated(startTimeInMs: Int, endTimeInMs: Int) {
         playbackTimeTextView.text = "${stringForTime(Math.abs(endTimeInMs - startTimeInMs).coerceAtLeast(1000))}"
         trimTimeRangeTextView.text = "${stringForTime(startTimeInMs)} - ${stringForTime(endTimeInMs)}"
-        onGotVideoFileSize(TrimVideoUtils.getFileSize(endTimeInMs-startTimeInMs, totalDuration, originSizeFile))
+        onGotVideoFileSize(TrimVideoUtils.getFileSize(endTimeInMs - startTimeInMs, totalDuration, originSizeFile))
     }
 
     override fun onVideoPlaybackReachingTime(timeInMs: Int) {
