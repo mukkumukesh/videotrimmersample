@@ -20,7 +20,7 @@ class TrimmerActivity : AppCompatActivity(), VideoTrimmingListener {
             finish()
             return
         }
-        videoTrimmerView.setMaxDurationInMs(20 * 1000)
+        videoTrimmerView.setMaxDurationInMs(180 * 1000)
         videoTrimmerView.setOnVideoListener(this)
         val parentFolder = getExternalFilesDir(null)!!
         parentFolder.mkdirs()

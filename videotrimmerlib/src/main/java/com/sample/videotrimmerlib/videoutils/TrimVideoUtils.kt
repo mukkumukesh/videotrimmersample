@@ -50,21 +50,50 @@ object TrimVideoUtils {
                 succeeded = it != null && outputTrimmedVideoFile.exists()
             }
         }
+        val src = FileUtils.getPath(context, inputVideoUri)
+        try {
+            succeeded = genVideoUsingMp4Parser(src, outputTrimmedVideoFile, startMs, endMs)
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMp4Parser : success") else Log.d(
+                TAG,
+                "Using genVideoUsingMp4Parser : fail"
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         if (!succeeded) {
-            try {
-                FileUtils.getPath(context, inputVideoUri)?.let {
-                    genVideoUsingFFmpegParser(
-                        context,
-                        it,
-                        outputTrimmedVideoFile,
-                        watermarkFile,
-                        startMs,
-                        endMs,
-                        callback
-                    )
+            succeeded = genVideoUsingMuxer(
+                context,
+                Uri.parse(src),
+                outputTrimmedVideoFile.absolutePath,
+                startMs,
+                endMs,
+                true,
+                true
+            )
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMuxer : success") else Log.d(
+                TAG,
+                "Using genVideoUsingMuxer : fail"
+            )
+        }
+        Handler(Looper.getMainLooper()).post {
+            if (succeeded) {
+                callback.onFinishedTrimming(Uri.parse(outputTrimmedVideoFile.absolutePath))
+            } else {
+                try {
+                    FileUtils.getPath(context, inputVideoUri)?.let {
+                        genVideoUsingFFmpegParser(
+                            context,
+                            it,
+                            outputTrimmedVideoFile,
+                            watermarkFile,
+                            startMs,
+                            endMs,
+                            callback
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
@@ -144,7 +173,10 @@ object TrimVideoUtils {
         var succeeded = false
         try {
             succeeded = genVideoUsingMp4Parser(src, dst, startMs, endMs)
-            if (succeeded) Log.d(TAG, "Using genVideoUsingMp4Parser : success") else Log.d(TAG, "Using genVideoUsingMp4Parser : fail")
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMp4Parser : success") else Log.d(
+                TAG,
+                "Using genVideoUsingMp4Parser : fail"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -158,7 +190,10 @@ object TrimVideoUtils {
                 true,
                 true
             )
-            if (succeeded) Log.d(TAG, "Using genVideoUsingMuxer : success") else Log.d(TAG, "Using genVideoUsingMuxer : fail")
+            if (succeeded) Log.d(TAG, "Using genVideoUsingMuxer : success") else Log.d(
+                TAG,
+                "Using genVideoUsingMuxer : fail"
+            )
         }
         Handler(Looper.getMainLooper()).post {
             callback.onFinishedTrimming(if (succeeded) Uri.parse(dst.absolutePath) else null)
